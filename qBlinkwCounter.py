@@ -8,6 +8,8 @@ SDI = 24
 RCLK = 23
 SRCLK = 18
 
+BtnPin = 12
+
 placePin = (10,22,27,17)
 number = (0xc0, 0xf9, 0xa4, 0xb0, 0x99, 0x92, 0x82, 0xf8, 0x80, 0x90)
 
@@ -43,7 +45,7 @@ def setup():
 	#Set LedPin's mode to output, and initial level to High(3.3v)
 	GPIO.setup(LedPin,GPIO.OUT, initial=GPIO.HIGH)
 	GPIO.setup(LedPinGreen, GPIO.OUT, initial=GPIO.HIGH)
-
+	GPIO.setup(BtnPin, GPIO.IN)
 	GPIO.setmode(GPIO.BCM) 
 	GPIO.setup(SDI, GPIO.OUT) 
 	GPIO.setup(RCLK, GPIO.OUT)
@@ -55,10 +57,14 @@ def setup():
 #Define a main function for main process
 	
 
+status = False
 
-def main():
+def go(ev=None):
 #		time.sleep(20)
 #	try:
+		global status
+		status= not status
+
 		file = open("numbers.txt", "r")
 		#print(file.read())
 		num = int(float(file.read()))
@@ -112,9 +118,16 @@ def main():
 
 		print('LED OFF....')
 		time.sleep(0.5)
-		destroy()
+		
 #	except:
 #		print("Too lazy to figure out the error")
+
+def main():
+	GPIO.add_event_detect(BtnPin, GPIO.FALLING, callback=go)
+	while True:
+		time.sleep(1)
+
+
 def destroy():
 	#turn off LED
 	GPIO.output(LedPin, GPIO.HIGH)
